@@ -9,8 +9,8 @@ Try [https://kv.ahxxm.com](https://kv.ahxxm.com).
 |Method|Path|Result|Note|
 |----|----|----|----|
 |POST|/new|token||
-|POST|/<token>/<key>|key|value in HTTP body|
-|GET|/<token>/<key>|value||
+|POST|/{token}/{key}|key|value in HTTP body|
+|GET|/{token}/{key}|value||
 
 *Value <=4KB, will overwrite.*
 

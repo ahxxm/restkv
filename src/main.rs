@@ -26,7 +26,6 @@ async fn main() {
 
     let get = warp::path!(String / String).and(warp::get()).map(get_value);
 
-    // TODO: a-zA-Z0-9 key
     let post = warp::path!(String / String)
         .and(warp::post())
         .and(warp::body::content_length_limit(1024 * 4)) // limit to 4KB body
