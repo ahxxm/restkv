@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  test:
+  build:
     docker:
       - image: rust:1
     steps:
@@ -19,7 +19,5 @@ jobs:
           paths:
             - /usr/local/cargo/registry
             - target/
-          key: v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
-      - run:
-          name: Run all tests
-          command: cargo test --all
+          key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+            
