@@ -20,8 +20,4 @@ jobs:
             - /usr/local/cargo/registry
             - target/
           key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
-      - run:
-          name: Release binary
-          command: ./release.sh
-          # command: if [[ '${CIRCLE_BRANCH}' -eq 'master' ]] ; then ./release.sh ;fi
-  
+            
