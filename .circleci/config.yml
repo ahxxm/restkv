@@ -20,4 +20,6 @@ jobs:
             - /usr/local/cargo/registry
             - target/
           key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - store_artifacts:
+          path: target/release/restkv
             
