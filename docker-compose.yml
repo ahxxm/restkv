@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  restkv:
+    build: .
+    volumes:
+      - ./kv.db:/kv.db
+    ports:
+      - 127.0.0.1:12345:8080/tcp
+    command: "/restkv"
