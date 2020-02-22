@@ -1,0 +1,25 @@
+[package]
+name = "restkv"
+version = "0.1.0"
+authors = ["ahxxm <i@ahxxm.com>"]
+edition = "2018"
+
+[dependencies]
+# web https://github.com/seanmonstar/warp
+tokio = { version = "0.2", features = ["macros"] }
+rand = "^0.7.3" # random access-token
+bytes = "0.5.4" # POST body
+warp = "0.2" # routing
+regex = "1" # validate param
+
+# file db, https://github.com/zshipko/rust-kv built on https://github.com/spacejam/sled
+kv = "0.20.0"
+sled = { version = "0.31", features = ["compression"] } # kv didn't enable compression in its toml
+lazy_static = "1.4.0" # global db instance
+
+# logger
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
+pretty_env_logger = "0.3"
+
+[profile.release]
+lto = true
