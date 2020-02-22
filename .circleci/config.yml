@@ -21,5 +21,7 @@ jobs:
             - target/
           key: v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
-          name: Run all tests
-          command: cargo test --all
+          name: Release binary
+          command: ./release.sh
+          # command: if [[ '${CIRCLE_BRANCH}' -eq 'master' ]] ; then ./release.sh ;fi
+  
