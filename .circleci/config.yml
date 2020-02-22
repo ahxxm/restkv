@@ -19,7 +19,7 @@ jobs:
           paths:
             - /usr/local/cargo/registry
             - target/
-          key: v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+          key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Release binary
           command: ./release.sh
