@@ -6,10 +6,6 @@ use lib::{get_value, post_value, random_token, write_token};
 use log::info;
 use warp::Filter;
 
-/*
-TODO: /stats
-*/
-
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
@@ -33,7 +29,8 @@ async fn main() {
         .map(post_value);
 
     // TODO: /stats
-    let routes = new_token.or(get).or(post);
+    let homepage = warp::any().map(||"https://github.com/ahxxm/restkv");
+    let routes = new_token.or(get).or(post).or(homepage);
 
     info!("starting server at {}", 8080);
     warp::serve(routes).run(([0, 0, 0, 0], 8080)).await;
