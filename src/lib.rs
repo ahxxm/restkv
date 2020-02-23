@@ -55,6 +55,23 @@ pub fn write_token(t: &str) -> bool {
     false
 }
 
+pub fn random_token() -> String {
+    let len = 8;
+    let mut token: String;
+
+    loop {
+        let mut rng = thread_rng();
+        token = iter::repeat(())
+            .map(|()| rng.sample(Alphanumeric))
+            .take(len)
+            .collect();
+        if !token_exist(&token) {
+            break;
+        }
+    }
+    token
+}
+
 pub fn get_value(t: String, k: String) -> String {
     let null = "".to_string();
     if !token_exist(&t) {
@@ -90,7 +107,6 @@ fn validate_key(key: &str) -> bool {
         static ref RE: Regex = Regex::new(r"[0-9a-zA-Z]{1,100}").unwrap();
     }
     RE.is_match(key)
-
 }
 
 pub fn post_value(token: String, key: String, value: Bytes) -> String {
@@ -129,19 +145,26 @@ pub fn post_value(token: String, key: String, value: Bytes) -> String {
     null
 }
 
-pub fn random_token() -> String {
-    let len = 8;
-    let mut token: String;
+pub fn stats() -> String {
+    let mut token_count = 0;
+    let mut value_count = 0;
+    if let Ok(db) = DB.read() {
+        token_count = match db.bucket::<String, String>(Some(TOKEN)) {
+            Ok(bucket) => bucket.iter().count(),
+            Err(e) => {
+                warn!("failed get tokens bucket {}", e);
+                0
+            }
+        };
 
-    loop {
-        let mut rng = thread_rng();
-        token = iter::repeat(())
-            .map(|()| rng.sample(Alphanumeric))
-            .take(len)
-            .collect();
-        if !token_exist(&token) {
-            break;
-        }
-    }
-    token
+        value_count = match db.bucket::<String, String>(Some(VALUES)) {
+            Ok(bucket) => bucket.iter().count(),
+            Err(e) => {
+                warn!("failed get values bucket {}", e);
+                0
+            }
+        };
+    } 
+
+    format!("serving {} access token, {} k-v pairs", token_count, value_count)
 }

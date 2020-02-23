@@ -5,5 +5,7 @@ services:
     build: .
     volumes:
       - ./kv.db:/kv.db
+    environment:
+      - RUST_LOG=debug
     ports:
       - 127.0.0.1:12345:8080/tcp
