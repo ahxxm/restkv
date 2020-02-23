@@ -1,5 +1,7 @@
 # RestKV
 
+[![CircleCI](https://circleci.com/gh/ahxxm/restkv.svg?style=svg)](https://circleci.com/gh/ahxxm/restkv)
+
 A simple, unreliable Key-Value store for serverless applications.
 
 ## API
