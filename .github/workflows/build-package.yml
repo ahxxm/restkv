@@ -17,8 +17,8 @@ jobs:
     - uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --release
-    - run: xz -kS "-${{ github.ref }}-x86_64.bin.xz" target/release/restkv
+        args: --release --target x86_64-unknown-linux-musl
+    - run: xz -kS "-${{ github.ref }}-x86_64-musl.bin.xz" target/x86_64-unknown-linux-musl/release/restkv
     - uses: ncipollo/release-action@v1
       with:
         artifact: target/debian/*.deb,target/release/*.bin.xz
