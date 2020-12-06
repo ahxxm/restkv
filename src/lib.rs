@@ -10,7 +10,7 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use regex::Regex;
 
-use bytes::Bytes;
+use warp::hyper::body::{Bytes};
 use kv::{Config, Store};
 use log::{warn};
 
@@ -21,7 +21,9 @@ lazy_static::lazy_static! {
     static ref DB: Arc<RwLock<Store>> = {
         let cfg = Config {
             path: std::path::PathBuf::from("kv.db"),
-            read_only: false,
+            // https://docs.rs/sled/0.34.6/sled/struct.Config.html#method.cache_capacity
+            // defaults to 1GB: 1024 * 1024 * 1024..limit to 64M
+            cache_capacity: Some(64*1024*1024),
             temporary: false,
             use_compression: true,
             flush_every_ms: Some(30000),
