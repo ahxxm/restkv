@@ -3,11 +3,10 @@ extern crate rand;
 
 use lazy_static;
 
-use std::iter;
 use std::sync::{Arc, RwLock};
 
 use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::{Rng};
 use regex::Regex;
 
 use bytes::Bytes;
@@ -21,9 +20,10 @@ lazy_static::lazy_static! {
     static ref DB: Arc<RwLock<Store>> = {
         let cfg = Config {
             path: std::path::PathBuf::from("kv.db"),
-            read_only: false,
             temporary: false,
+            cache_capacity: None,
             use_compression: true,
+            segment_size: Some(2 << 22), // old default 8mb
             flush_every_ms: Some(30000),
         };
         let store = Store::new(cfg).unwrap();
@@ -47,7 +47,7 @@ pub fn write_token(t: &str) -> bool {
     let token_key = format!("token-{}", t);
     if let Ok(db) = DB.write() {
         if let Ok(bucket) = db.bucket::<String, String>(Some(TOKEN)) {
-            if let Ok(_) = bucket.set(token_key, "1") {
+            if let Ok(_) = bucket.set(&token_key, &token_key) {
                 return true;
             }
         }
@@ -60,10 +60,10 @@ pub fn random_token() -> String {
     let mut token: String;
 
     loop {
-        let mut rng = thread_rng();
-        token = iter::repeat(())
-            .map(|()| rng.sample(Alphanumeric))
+        token = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
             .take(len)
+            .map(char::from)
             .collect();
         if !token_exist(&token) {
             break;
@@ -95,7 +95,7 @@ pub fn get_value(t: String, k: String) -> String {
     };
 
     let tk = format!("{}-{}", t, k);
-    if let Ok(Some(val)) = bucket.get(tk) {
+    if let Ok(Some(val)) = bucket.get(&tk) {
         val
     } else {
         null
@@ -139,7 +139,7 @@ pub fn post_value(token: String, key: String, value: Bytes) -> String {
     };
 
     let tk = format!("{}-{}", token, key);
-    if let Ok(_) = bucket.set(tk, body) {
+    if let Ok(_) = bucket.set(&tk, &body) {
         return key;
     }
     null
@@ -164,7 +164,7 @@ pub fn stats() -> String {
                 0
             }
         };
-    } 
+    }
 
     format!("serving {} access token, {} k-v pairs", token_count, value_count)
 }
