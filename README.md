@@ -1,6 +1,6 @@
 # RestKV
 
-[![CircleCI](https://circleci.com/gh/ahxxm/restkv.svg?style=svg)](https://circleci.com/gh/ahxxm/restkv)
+[![Build](https://github.com/ahxxm/restkv/actions/workflows/rust.yml/badge.svg)](https://github.com/ahxxm/restkv/actions/workflows/rust.yml)
 
 A simple, unreliable Key-Value store for serverless applications.
 
@@ -23,4 +23,3 @@ POST curl equivalent: `curl -X POST -d 'value' https://kv.ahxxm.com/token/key`.
 RestKV is now designed to be behind a reverse proxy, it listens at `0.0.0.0:8080`(hard-coded).
 
 Check `docker-compose.yml`.
-
