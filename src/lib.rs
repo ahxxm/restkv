@@ -145,6 +145,46 @@ pub fn post_value(token: String, key: String, value: Bytes) -> String {
     null
 }
 
+pub fn list_keys(token: String) -> String {
+    let null = "".to_string();
+    if !token_exist(&token) {
+        return null;
+    }
+
+    let db = match DB.read() {
+        Ok(d) => d,
+        Err(e) => {
+            warn!("failed get read lock {}", e);
+            return null;
+        }
+    };
+
+    let bucket = match db.bucket::<String, String>(Some(VALUES)) {
+        Ok(b) => b,
+        Err(e) => {
+            warn!("failed get values bucket {}", e);
+            return null;
+        }
+    };
+
+    let pf = format!("{}-", token);
+    let ks : Vec<String> = bucket.iter()
+      .map(|k| match k {
+        Ok(it) => {
+          if let Ok(k) = it.key::<String>() {
+            k
+          } else {
+            null.clone()
+          }
+        }
+        Err(_) => null.clone(),
+      })
+      .filter(|x| x.starts_with(&pf))
+      .map(|k| k.trim_start_matches(&pf).to_string())
+      .collect();
+    "[".to_owned() + &ks.join(", ") + &"]".to_owned()
+}
+
 pub fn stats() -> String {
     let mut token_count = 0;
     let mut value_count = 0;
