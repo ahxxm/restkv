@@ -1,7 +1,7 @@
 extern crate pretty_env_logger;
 
 mod lib;
-use lib::{get_value, post_value, random_token, write_token, stats};
+use lib::{list_keys, get_value, post_value, random_token, write_token, stats};
 
 use log::info;
 use warp::Filter;
@@ -20,6 +20,8 @@ async fn main() {
         }
     });
 
+    let keys = warp::path!("keys" / String).and(warp::get()).map(list_keys);
+
     let get = warp::path!(String / String).and(warp::get()).map(get_value);
 
     let post = warp::path!(String / String)
@@ -33,8 +35,8 @@ async fn main() {
         .map(stats);
 
     let homepage = warp::any().map(||"https://github.com/ahxxm/restkv");
-    let routes = new_token.or(get).or(post).or(stat).or(homepage);
+    let routes = new_token.or(keys).or(get).or(post).or(stat).or(homepage);
 
-    info!("starting server at {}", 8080);
+    info!("starting server at {}", 28080);
     warp::serve(routes).run(([0, 0, 0, 0], 28080)).await;
 }

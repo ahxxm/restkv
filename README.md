@@ -13,6 +13,7 @@ Try [https://kv.ahxxm.com](https://kv.ahxxm.com).
 |POST|/new|token||
 |POST|/{token}/{key}|key|value in HTTP body|
 |GET|/{token}/{key}|value||
+|GET|/keys/{token}|list of keys under the token||
 
 *Value <=4KB, will overwrite.*
 
