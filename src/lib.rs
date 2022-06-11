@@ -6,12 +6,12 @@ use lazy_static;
 use std::sync::{Arc, RwLock};
 
 use rand::distributions::Alphanumeric;
-use rand::{Rng};
+use rand::Rng;
 use regex::Regex;
 
 use bytes::Bytes;
-use kv::{Config, Store};
-use log::{warn};
+use kv::{Config, Store, Bucket};
+use log::warn;
 
 // db and bucket names
 static TOKEN: &str = "token";
@@ -31,13 +31,28 @@ lazy_static::lazy_static! {
     };
 }
 
+fn open_bucket(name: &str, write: bool) -> Option<Bucket<String, String>> {
+    if write {
+        if let Ok(db) = DB.write() {
+            if let Ok(bucket) = db.bucket::<String, String>(Some(name)) {
+                return Some(bucket)
+            }
+        }
+    } else {
+        if let Ok(db) = DB.read() {
+            if let Ok(bucket) = db.bucket::<String, String>(Some(name)) {
+                return Some(bucket);
+            }
+        }
+    }
+    None
+}
+
 pub fn token_exist(t: &str) -> bool {
     let token_key = format!("token-{}", t);
-    if let Ok(db) = DB.read() {
-        if let Ok(bucket) = db.bucket::<String, String>(Some(TOKEN)) {
-            if let Ok(b) = bucket.contains(&token_key) {
-                return b;
-            }
+    if let Some(bucket) = open_bucket(TOKEN, false) {
+        if let Ok(b) = bucket.contains(&token_key) {
+            return b;
         }
     }
     true
@@ -45,11 +60,9 @@ pub fn token_exist(t: &str) -> bool {
 
 pub fn write_token(t: &str) -> bool {
     let token_key = format!("token-{}", t);
-    if let Ok(db) = DB.write() {
-        if let Ok(bucket) = db.bucket::<String, String>(Some(TOKEN)) {
-            if let Ok(_) = bucket.set(&token_key, &token_key) {
-                return true;
-            }
+    if let Some(bucket) = open_bucket(TOKEN, true) {
+        if let Ok(_) = bucket.set(&token_key, &token_key) {
+            return true;
         }
     }
     false
@@ -78,28 +91,13 @@ pub fn get_value(t: String, k: String) -> String {
         return null;
     }
 
-    let db = match DB.read() {
-        Ok(d) => d,
-        Err(e) => {
-            warn!("failed get read lock {}", e);
-            return null;
+    if let Some(bucket) = open_bucket(VALUES, false) {
+        let tk = format!("{}-{}", t, k);
+        if let Ok(Some(val)) = bucket.get(&tk) {
+            return val
         }
-    };
-
-    let bucket = match db.bucket::<String, String>(Some(VALUES)) {
-        Ok(b) => b,
-        Err(e) => {
-            warn!("failed get values bucket {}", e);
-            return null;
-        }
-    };
-
-    let tk = format!("{}-{}", t, k);
-    if let Ok(Some(val)) = bucket.get(&tk) {
-        val
-    } else {
-        null
     }
+    null
 }
 
 fn validate_key(key: &str) -> bool {
@@ -122,25 +120,12 @@ pub fn post_value(token: String, key: String, value: Bytes) -> String {
             return null;
         }
     };
-    let db = match DB.write() {
-        Ok(d) => d,
-        Err(e) => {
-            warn!("failed get read lock {}", e);
-            return null;
-        }
-    };
 
-    let bucket = match db.bucket::<String, String>(Some(VALUES)) {
-        Ok(b) => b,
-        Err(e) => {
-            warn!("failed get values bucket {}", e);
-            return null;
+    if let Some(bucket) = open_bucket(VALUES, true) {
+        let tk = format!("{}-{}", token, key);
+        if let Ok(_) = bucket.set(&tk, &body) {
+            return key;
         }
-    };
-
-    let tk = format!("{}-{}", token, key);
-    if let Ok(_) = bucket.set(&tk, &body) {
-        return key;
     }
     null
 }
