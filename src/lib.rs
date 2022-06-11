@@ -34,12 +34,11 @@ lazy_static::lazy_static! {
 fn open_bucket(name: &str, write: bool) -> Option<Bucket<String, String>> {
     if write {
         let db = DB.write().ok()?;
-        db.bucket::<String, String>(Some(name)).ok();
+        db.bucket::<String, String>(Some(name)).ok()
     } else {
         let db = DB.read().ok()?;
-        db.bucket::<String, String>(Some(name)).ok();
+        db.bucket::<String, String>(Some(name)).ok()
     }
-    None
 }
 
 pub fn token_exist(t: &str) -> bool {
