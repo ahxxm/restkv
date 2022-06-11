@@ -33,17 +33,11 @@ lazy_static::lazy_static! {
 
 fn open_bucket(name: &str, write: bool) -> Option<Bucket<String, String>> {
     if write {
-        if let Ok(db) = DB.write() {
-            if let Ok(bucket) = db.bucket::<String, String>(Some(name)) {
-                return Some(bucket)
-            }
-        }
+        let db = DB.write().ok()?;
+        db.bucket::<String, String>(Some(name)).ok();
     } else {
-        if let Ok(db) = DB.read() {
-            if let Ok(bucket) = db.bucket::<String, String>(Some(name)) {
-                return Some(bucket);
-            }
-        }
+        let db = DB.read().ok()?;
+        db.bucket::<String, String>(Some(name)).ok();
     }
     None
 }
