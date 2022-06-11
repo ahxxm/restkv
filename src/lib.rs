@@ -10,7 +10,7 @@ use rand::Rng;
 use regex::Regex;
 
 use bytes::Bytes;
-use kv::{Config, Store, Bucket};
+use kv::{Bucket, Config, Store};
 use log::warn;
 
 // db and bucket names
@@ -34,20 +34,17 @@ lazy_static::lazy_static! {
 fn open_bucket(name: &str, write: bool) -> Option<Bucket<String, String>> {
     if write {
         let db = DB.write().ok()?;
-        db.bucket::<String, String>(Some(name)).ok();
+        db.bucket::<String, String>(Some(name)).ok()
     } else {
         let db = DB.read().ok()?;
-        db.bucket::<String, String>(Some(name)).ok();
+        db.bucket::<String, String>(Some(name)).ok()
     }
-    None
 }
 
 pub fn token_exist(t: &str) -> bool {
     let token_key = format!("token-{}", t);
     if let Some(bucket) = open_bucket(TOKEN, false) {
-        if let Ok(b) = bucket.contains(&token_key) {
-            return b;
-        }
+        return bucket.contains(&token_key).ok().unwrap_or(true);
     }
     true
 }
@@ -55,9 +52,10 @@ pub fn token_exist(t: &str) -> bool {
 pub fn write_token(t: &str) -> bool {
     let token_key = format!("token-{}", t);
     if let Some(bucket) = open_bucket(TOKEN, true) {
-        if let Ok(_) = bucket.set(&token_key, &token_key) {
-            return true;
-        }
+        return bucket
+            .set(&token_key, &token_key)
+            .and_then(|_| Ok(true))
+            .unwrap_or(true);
     }
     false
 }
@@ -103,7 +101,7 @@ fn validate_key(key: &str) -> bool {
 
 pub fn post_value(token: String, key: String, value: Bytes) -> String {
     let null = "".to_string();
-    if !token_exist(&token) || !validate_key(&key){
+    if !token_exist(&token) || !validate_key(&key) {
         return null;
     }
 
@@ -129,39 +127,25 @@ pub fn list_keys(token: String) -> String {
     if !token_exist(&token) {
         return null;
     }
-
-    let db = match DB.read() {
-        Ok(d) => d,
-        Err(e) => {
-            warn!("failed get read lock {}", e);
-            return null;
-        }
-    };
-
-    let bucket = match db.bucket::<String, String>(Some(VALUES)) {
-        Ok(b) => b,
-        Err(e) => {
-            warn!("failed get values bucket {}", e);
-            return null;
-        }
-    };
-
-    let pf = format!("{}-", token);
-    let ks : Vec<String> = bucket.iter()
-      .map(|k| match k {
-        Ok(it) => {
-          if let Ok(k) = it.key::<String>() {
-            k
-          } else {
-            null.clone()
-          }
-        }
-        Err(_) => null.clone(),
-      })
-      .filter(|x| x.starts_with(&pf))
-      .map(|k| k.trim_start_matches(&pf).to_string())
-      .collect();
-    "[".to_owned() + &ks.join(", ") + &"]".to_owned()
+    if let Some(bucket) = open_bucket(VALUES, false) {
+        let pf = format!("{}-", token);
+        let ks: Vec<String> = bucket
+            .iter()
+            .map(|k| match k {
+                Ok(it) => {
+                    match it.key::<String>() {
+                        Ok(k) => k,
+                        Err(_) => null.clone(),
+                    }
+                }
+                Err(_) => null.clone(),
+            })
+            .filter(|x| x.starts_with(&pf))
+            .map(|k| k.trim_start_matches(&pf).to_string())
+            .collect();
+        return "[".to_owned() + &ks.join(", ") + &"]".to_owned();
+    }
+    null
 }
 
 pub fn stats() -> String {
@@ -185,5 +169,8 @@ pub fn stats() -> String {
         };
     }
 
-    format!("serving {} access token, {} k-v pairs", token_count, value_count)
+    format!(
+        "serving {} access token, {} k-v pairs",
+        token_count, value_count
+    )
 }
