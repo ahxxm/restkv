@@ -12,7 +12,7 @@ bytes = "1.2.1" # POST body
 warp = "0.3.3" # routing
 regex = "1.7.0" # validate param
 lazy_static = "1.4.0" # global db instance
-kv = "0.24"
+kv = { version = "0.24" } # no compression
 
 # logger
 log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }

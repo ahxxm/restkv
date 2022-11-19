@@ -19,16 +19,18 @@ static TOKEN: &str = "token";
 static VALUES: &str = "values";
 lazy_static::lazy_static! {
     static ref DB: Arc<RwLock<Store>> = {
-        // from 0.20.0 sled, default to 8mb
+        // from 0.20.0 sled, default to 8mb(2<<22, 8388608)
+        // but afterwards it's 512*1024=524288, and it's subject to change
+        // see https://github.com/zshipko/rust-kv/pull/16
         let segsize = match env::var("SEGMENG_SIZE") {
-            Ok(val) => val.parse().unwrap_or(2 << 22),
-            Err(_) => 2 << 22
+            Ok(val) => val.parse().unwrap_or(524288),
+            Err(_) => 524288
         };
         let cfg = Config {
             path: std::path::PathBuf::from("kv.db"),
             temporary: false,
             cache_capacity: None,
-            use_compression: true,
+            use_compression: false,
             segment_size: Some(segsize),
             flush_every_ms: Some(30000),
         };
