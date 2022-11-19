@@ -12,12 +12,7 @@ bytes = "1.1.0" # POST body
 warp = "0.3.2" # routing
 regex = "1.5.5" # validate param
 lazy_static = "1.4.0" # global db instance
-
-# file db, https://github.com/zshipko/rust-kv built on https://github.com/spacejam/sled
-# NOTE: https://github.com/zshipko/rust-kv/blob/master/Cargo.toml#L17
-# kv didn't enable compression in its toml, nor use semver...
-kv = "0.23.1"
-sled = { version = "0.34.7", features = ["compression"] }
+kv = "0.24"
 
 # logger
 log = { version = "0.4.16", features = ["max_level_debug", "release_max_level_info"] }
