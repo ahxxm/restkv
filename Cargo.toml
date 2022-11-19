@@ -6,21 +6,16 @@ edition = "2021"
 
 [dependencies]
 # web https://github.com/seanmonstar/warp
-tokio = { version = "1.17", features = ["full"] }
+tokio = { version = "1.22.0", features = ["full"] }
 rand = "0.8.5" # random access-token
-bytes = "1.1.0" # POST body
-warp = "0.3.2" # routing
-regex = "1.5.5" # validate param
+bytes = "1.2.1" # POST body
+warp = "0.3.3" # routing
+regex = "1.7.0" # validate param
 lazy_static = "1.4.0" # global db instance
-
-# file db, https://github.com/zshipko/rust-kv built on https://github.com/spacejam/sled
-# NOTE: https://github.com/zshipko/rust-kv/blob/master/Cargo.toml#L17
-# kv didn't enable compression in its toml, nor use semver...
-kv = "0.23.1"
-sled = { version = "0.34.7", features = ["compression"] }
+kv = "0.24"
 
 # logger
-log = { version = "0.4.16", features = ["max_level_debug", "release_max_level_info"] }
+log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }
 pretty_env_logger = "0.4.0"
 
 [profile.release]

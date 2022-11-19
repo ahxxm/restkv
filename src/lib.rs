@@ -4,6 +4,7 @@ extern crate rand;
 use lazy_static;
 
 use std::sync::{Arc, RwLock};
+use std::env;
 
 use rand::distributions::Alphanumeric;
 use rand::Rng;
@@ -18,12 +19,17 @@ static TOKEN: &str = "token";
 static VALUES: &str = "values";
 lazy_static::lazy_static! {
     static ref DB: Arc<RwLock<Store>> = {
+        // from 0.20.0 sled, default to 8mb
+        let segsize = match env::var("SEGMENG_SIZE") {
+            Ok(val) => val.parse().unwrap_or(2 << 22),
+            Err(_) => 2 << 22
+        };
         let cfg = Config {
             path: std::path::PathBuf::from("kv.db"),
             temporary: false,
             cache_capacity: None,
             use_compression: true,
-            segment_size: Some(2 << 22), // old default 8mb
+            segment_size: Some(segsize),
             flush_every_ms: Some(30000),
         };
         let store = Store::new(cfg).unwrap();

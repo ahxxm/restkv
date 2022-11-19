@@ -6,6 +6,7 @@ services:
     volumes:
       - ./kv.db:/kv.db
     environment:
+      - 'SEGMENT_SIZE=8388608'
       - RUST_LOG=debug
     ports:
       - 127.0.0.1:12345:28080/tcp
