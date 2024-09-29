@@ -6,7 +6,7 @@ A simple, unreliable Key-Value store for serverless applications.
 
 ## API
 
-Try [https://kv.ahxxm.com](https://kv.ahxxm.com).
+~~Try [https://kv.ahxxm.com](https://kv.ahxxm.com).~~ (put down because Cloudflare API [restful KV access](https://developers.cloudflare.com/api/operations/workers-kv-namespace-write-key-value-pair-with-metadata))
 
 |Method|Path|Result|Note|
 |----|----|----|----|
